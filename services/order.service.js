@@ -4,9 +4,36 @@ class OrderService {
 
   constructor(){
   }
-  async create(data) {
+
+  async create(userId) {
+
+    const { id } = await models.Customer.findOne({
+      where: {
+        '$user.id$': userId
+      },
+      include: ['user']
+    });
+
+    const data = {
+      customerId: id
+    }
     const newOrder = await models.Order.create(data);
     return newOrder;
+  }
+
+  async findByUser(userId){
+    const orders = await models.Order.findAll({
+      where:{
+        '$customer.user.id$': userId
+      },
+      include: [
+        {
+          association: 'customer',
+          include: ['user']
+        }
+      ]
+    });
+    return orders
   }
 
 async addItem(data){
